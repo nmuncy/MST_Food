@@ -21,7 +21,7 @@ library("openxlsx")
 
 
 ### Set variables
-parDir <- getwd()
+parDir <- paste0(getwd(),"/..")
 workDir <- paste0(parDir,"/Participants/")
 stimDir <- paste0(parDir,"/Stimuli/")
 winPath <- "Stimuli\\"
@@ -55,7 +55,8 @@ n.All <- n.Repeat+n.FFoil+n.OFoil
 
 
 ### Import terminal argument, make subjDir
-args <- commandArgs(TRUE)
+# args <- commandArgs(TRUE)
+args <- "p004"
 subj <- as.character(args[1])
 subjDir <- paste0(workDir, subj)
 dir.create(file.path(subjDir))
@@ -152,7 +153,7 @@ stim.FFoil <- tmp.FFoil[hold.rand]
 
 ### Build Blocks
 
-# set counters - so many...
+# set counters
 c.FHT <- c.FLT <- c.OT <- c.FHL <- c.FLL <- c.OL <- c.FF <- c.OF <- 1
 cc.FHT <- cc.FLT <- n.FHTarg
 cc.FHL <- cc.FLL <- n.FLLure
@@ -273,7 +274,7 @@ for(j in 1:n.Blocks){
   }
   
 
-  # StimValue col via brute force
+  # StimValue column
   # (TH = 61, TL = 62, TO = 63, LH = 71, LL = 72, OL = 73, FH = 91, FL = 92, FO = 93)
   for(i in 1:dim(hold.output)[1]){
     if(grepl("Targ",hold.output[i,2])==T && grepl("F_H_",hold.output[i,1])==T){

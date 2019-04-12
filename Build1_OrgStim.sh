@@ -7,7 +7,7 @@
 # A script to build the stimulus dir and set up for the R script.
 
 
-workDir=$(pwd)
+workDir=$(pwd)/..
 foodDir=${workDir}/FinalImages
 objDir=${workDir}/FinalObjects
 stimDir=${workDir}/Stimuli

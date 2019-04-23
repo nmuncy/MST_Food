@@ -55,8 +55,8 @@ n.All <- n.Repeat+n.FFoil+n.OFoil
 
 
 ### Import terminal argument, make subjDir
-# args <- commandArgs(TRUE)
-args <- "p004"
+args <- commandArgs(TRUE)
+# args <- "p004"
 subj <- as.character(args[1])
 subjDir <- paste0(workDir, subj)
 dir.create(file.path(subjDir))

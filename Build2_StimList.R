@@ -314,9 +314,16 @@ for(j in 1:n.Blocks){
   # write out
   trialNum <- 1:(2*(n.Repeat)+n.FFoil+n.OFoil)
   hold.output <- cbind(trialNum,hold.output)
+  
+  hold.reorganize <- matrix(NA,nrow=dim(hold.output)[1],ncol=dim(hold.output)[2])
+  hold.reorganize[,1] <- hold.output[,1]
+  hold.reorganize[,2:4] <- hold.output[,3:5]
+  hold.reorganize[,5] <- hold.output[,2]
+  hold.reorganize[,6:7] <- hold.output[,6:7]
+  
   fileName <- paste0(subj,"_B",j,"_stimuli.xlsx")
-  colnames(hold.output) <- c("Trial","StimFile","StimType","Lag","Repeat", "StimValue","CorResp")
-  write.xlsx(hold.output,paste0(subjDir,"/",fileName), sheetName = "Sheet1", col.names = TRUE, row.names = F, append = FALSE)
+  colnames(hold.reorganize) <- c("Trial","StimType","Lag","Repeat","StimFile","StimValue","CorResp")
+  write.xlsx(hold.reorganize,paste0(subjDir,"/",fileName), sheetName = "Sheet1", col.names = TRUE, row.names = F, append = FALSE)
 }
 
 

@@ -86,6 +86,7 @@ SeedNA.Function <- function(x,y){
 Build.Function <- function(Targ,Lure,Foil){
 
   for(x in c("Targ","Lure","Foil")){
+    # assign(paste0(x,".h"),paste0(winPath,get(x)))
     assign(paste0(x,".h"),paste0(winPath,get(x)))
   }
   hold.all <- c(Targ.h,Lure.h,Foil.h)

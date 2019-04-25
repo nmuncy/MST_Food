@@ -87,7 +87,7 @@ Build.Function <- function(Targ,Lure,Foil){
 
   for(x in c("Targ","Lure","Foil")){
     # assign(paste0(x,".h"),paste0(winPath,get(x)))
-    assign(paste0(x,".h"),paste0(winPath,get(x)))
+    assign(paste0(x,".h"),get(x))
   }
   hold.all <- c(Targ.h,Lure.h,Foil.h)
   hold.label <- c(rep("Targ",n.FHTarg+n.FLTarg+n.OTarg),rep("Lure",n.FHLure+n.FLLure+n.OLure),rep("Foil",n.FFoil+n.OFoil))

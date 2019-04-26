@@ -24,7 +24,7 @@ library("openxlsx")
 parDir <- paste0(getwd(),"/..")
 workDir <- paste0(parDir,"/Participants/")
 stimDir <- paste0(parDir,"/Stimuli/")
-winPath <- "Stimuli\\"
+# winPath <- "Stimuli\\"
 
 
 
@@ -38,15 +38,27 @@ winPath <- "Stimuli\\"
 # 70 stimuli per block, 60 will repeat -> block length = 130 trials
 # 70 stimuli * 6 blocks = 420 stimuli
 
-n.Blocks <- 6
+# n.Blocks <- 6
+# 
+# n.FHTarg <- n.FLTarg <- 5
+# n.FHLure <- n.FLLure <- 10
+# n.FFoil <- 5
+# 
+# n.OTarg <- 10
+# n.OLure <- 20
+# n.OFoil <- 5
 
-n.FHTarg <- n.FLTarg <- 5
-n.FHLure <- n.FLLure <- 10
-n.FFoil <- 5
 
-n.OTarg <- 10
-n.OLure <- 20
-n.OFoil <- 5
+# Double block length so we can run 3 not 6 blocks
+n.Blocks <- 3
+
+n.FHTarg <- n.FLTarg <- 10
+n.FHLure <- n.FLLure <- 20
+n.FFoil <- 10
+
+n.OTarg <- 20
+n.OLure <- 40
+n.OFoil <- 10
 
 n.Repeat <- n.FHTarg+n.FLTarg+n.OTarg+n.FHLure+n.FLLure+n.OLure
 n.All <- n.Repeat+n.FFoil+n.OFoil
@@ -56,7 +68,7 @@ n.All <- n.Repeat+n.FFoil+n.OFoil
 
 ### Import terminal argument, make subjDir
 args <- commandArgs(TRUE)
-# args <- "p004"
+# args <- "p666"
 subj <- as.character(args[1])
 subjDir <- paste0(workDir, subj)
 dir.create(file.path(subjDir))
@@ -302,11 +314,13 @@ for(j in 1:n.Blocks){
   
   # write correct response column (1=Old, 2=Sim, 3=New)
   for(i in 1:dim(hold.output)[1]){
-    if(hold.output[i,5]==61 || hold.output[i,5]==62 || hold.output[i,5]==63){
-      hold.output[i,6] <- 1
-    }else if(hold.output[i,5]==71 || hold.output[i,5]==72 || hold.output[i,5]==73){
-      hold.output[i,6] <- 2
-    }else if(hold.output[i,5]==91 || hold.output[i,5]==92 || hold.output[i,5]==93){
+    if(hold.output[i,4]=="Yes"){
+      if(hold.output[i,5]==61 || hold.output[i,5]==62 || hold.output[i,5]==63){
+        hold.output[i,6] <- 1
+      }else if(hold.output[i,5]==71 || hold.output[i,5]==72 || hold.output[i,5]==73){
+        hold.output[i,6] <- 2
+      }
+    }else{
       hold.output[i,6] <- 3
     }
   }

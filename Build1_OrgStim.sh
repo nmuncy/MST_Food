@@ -8,15 +8,15 @@
 
 
 workDir=$(pwd)/..
-foodDir=${workDir}/FinalImages
-objDir=${workDir}/FinalObjects
 stimDir=${workDir}/Stimuli
+foodDir=${stimDir}/Food
+objDir=${stimDir}/Objects
 
 
  ## cp food stimuli
  cd $foodDir
 
- for i in {High,Low}{,Single}; do
+ for i in {High,Low}{Pair,Single}; do
 
  	HL=${i:0:1}
  	hold=$((${#i}-1))

@@ -286,8 +286,10 @@ for(j in 1:n.Blocks){
     }
   }
   
-
-  # StimValue column
+  
+  ### Ammendments
+  
+  # Add StimValue column
   # (TH = 61, TL = 62, TO = 63, LH = 71, LL = 72, OL = 73, FH = 91, FL = 92, FO = 93)
   for(i in 1:dim(hold.output)[1]){
     if(grepl("Targ",hold.output[i,2])==T && grepl("F_H_",hold.output[i,1])==T){
@@ -330,6 +332,8 @@ for(j in 1:n.Blocks){
   trialNum <- 1:(2*(n.Repeat)+n.FFoil+n.OFoil)
   hold.output <- cbind(trialNum,hold.output)
   
+  
+  # Change output organization
   hold.reorganize <- matrix(NA,nrow=dim(hold.output)[1],ncol=dim(hold.output)[2])
   hold.reorganize[,1] <- hold.output[,1]
   hold.reorganize[,2:4] <- hold.output[,3:5]
@@ -341,45 +345,5 @@ for(j in 1:n.Blocks){
   colnames(hold.reorganize) <- c("Trial","StimType","Lag","Repeat","StimFile","StimValue","CorResp","CellNumber")
   write.xlsx(hold.reorganize,paste0(subjDir,"/",fileName), sheetName = "Sheet1", col.names = TRUE, row.names = F, append = FALSE)
 }
-
-
-
-# ### Manually create short practice block of 10 trials
-# stim.train <- all.stim[v.Train[1:n.Train]]
-# hold.train <- matrix(NA,nrow=12,ncol=5)
-# hold.train[,1] <- 1:12
-# 
-# hold.train[1:7,2] <- paste0(winPath,stim.train[1:7])
-# hold.train[8,2] <- paste0(winPath,stim.train[4])
-# hold.train[9:11,2] <- paste0(winPath,stim.train[8:10])
-# hold.train[12,2] <- paste0(winPath,stim.train[1])
-# 
-# hold.train[1:12,3] <- "Foil"
-# hold.train[1,3] <- "Targ"
-# hold.train[4,3] <- "Lure"
-# hold.train[8,3] <- "Lure"
-# hold.train[12,3] <- "Targ"
-# 
-# hold.train[1:12,4] <- 0
-# hold.train[1,4] <- 12
-# hold.train[4,4] <- 4
-# hold.train[8,4] <- 4
-# hold.train[12,4] <- 12
-# 
-# hold.train[1:12,5] <- "No"
-# hold.train[8,5] <- "Yes"
-# hold.train[12,5] <- "Yes"
-# 
-# # switch a-b for repeat
-# for(i in 1:dim(hold.train)[1]){
-#   if(grepl("Yes",hold.train[i,5])==T){
-#     hold.train[i,2] <- gsub("a.jpg","b.jpg",hold.train[i,2])
-#   }
-# }
-# 
-# fileName <- paste0(subj,"_Train_stimuli.xlsx")
-# colnames(hold.train) <- c("Trial","File","StimType","Lag","Repeat")
-# write.xlsx(hold.train,paste0(subjDir,"/",fileName), sheetName = "Sheet1", col.names = TRUE, row.names = F, append = FALSE)
-
 
 

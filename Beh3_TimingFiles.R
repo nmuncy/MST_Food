@@ -1,6 +1,6 @@
 ### load data and packages
 library(stringr)
-
+library(openxlsx)
 
 
 inputDir <- "/Volumes/Vedder/FoodMST/Analyses/behAnalysis/all_data/converted/"
@@ -11,8 +11,8 @@ txtList <- t(txtList)
 
 # j <- txtList[1]
 for(j in txtList){
-  
-  data_raw <- read.delim(paste0(inputDir,j),sep=" ")
+  data_raw <- read.delim(paste0("~/Desktop/",j),sep=" ")
+  #data_raw <- read.delim(paste0(inputDir,j),sep=" ")
   
   # strip off training
   ind_start <- as.numeric(grep("Test:", data_raw[,1]))
@@ -28,230 +28,137 @@ for(j in txtList){
   ind_stimType <- grep("StimValue:", data_raw[,1])
   ind_corr <- grep("Correct:", data_raw[,1])
   ind_resp <- grep("Stim.RESP:", data_raw[,1])
-  
-  
-  # correct for multiple responses - assumes no double response on first trial
-  #### does this work?
-  cor_range <- as.numeric(ind_stimImage[2]-ind_stimImage[1])
-  if(length(ind_resp) != length(ind_stimImage)){
-    for(i in 1:length(ind_resp)){
-      holdA <- as.numeric(ind_resp[i])
-      holdB <- as.numeric(ind_resp[i+1])
-      if(holdB-holdA != cor_range){
-        ind_resp <- ind_resp[-(i+1)]
-      }
-    }
-  }
-  if(length(ind_resp) != length(ind_stimImage)){
-    print("Problem in number of responses")
-    break
-  }
-  
+
   
   # split into blocks
-  var_list <- c("stimImage","stimType","corr","resp")
-  
   for (i in 1:length(ind_blockList)) {
-    for (k in var_list) {
-      assign(paste0("ind_",k,"_block",i),NA)
-    }
-  }
-
-  for(i in 1:length(ind_stimImage)){
-   for(k in 1:length(ind_blockList)){
-     if(as.numeric(ind_stimImage[i]) < ind_blockList[k]){
-       for(m in var_list){
-         assign(paste0("ind_",m,"_block",k),c(get(paste0("ind_",m,"_block",k)),as.numeric(get(paste0("ind_",m))[i])))
-       }
-       break
-     }
-   } 
-  }
-  
-  for (i in 1:length(ind_blockList)) {
-    for (k in var_list) {
-      assign(paste0("ind_",k,"_block",i),get(paste0("ind_",k,"_block",i))[-1])
-    }
-  }
-  
-  
-  # extract useful info
-  for(i in 1:length(ind_blockList)){
-    for(k in var_list){
-      if(k != "stimImage"){
-        assign(paste0("hold_",k,"_block",i),as.numeric(as.character(data_raw[get(paste0("ind_",k,"_block",i)),2])))
+    
+    if(i ==1){
+      ind_block <- which(ind_stimImage < ind_blockList[i])
       }else{
-        assign(paste0("hold_",k,"_block",i),as.character(data_raw[get(paste0("ind_",k,"_block",i)),2]))
-      }
-    }
-  }
-
-  
-  ## determine behavior - split for stim types
-  # (TH = 61, TL = 62, TO = 63, LH = 71, LL = 72, OL = 73, FH = 91, FL = 92, FO = 93)
-  # (1 = old, 2 = sim, 3 = new)
-  for(i in 1:length(ind_blockList)){
+        ind_block <- which(ind_stimImage < ind_blockList[i] & ind_stimImage >=ind_blockList[i-1]) }
     
-    hold_stimType <- get(paste0("hold_stimType_block",i))
-    hold_resp <- get(paste0("hold_resp_block",i))
-    hold_corr <- get(paste0("hold_corr_block",i))
+    hold_stimType <- as.numeric(as.character(data_raw[ind_stimType[ind_block],2]))
+    hold_resp <- as.numeric(as.character(data_raw[ind_resp[ind_block],2]))
+    hold_corr <- as.numeric(as.character(data_raw[ind_corr[ind_block],2]))
     
-    assign(paste0("behAll_resp_block",i),NA)
-    assign(paste0("behSep_resp_block",i),NA)
+    # set up matrices
+    behAll_resp <- behSep_resp <- matrix(0,nrow=length(ind_block),ncol=1)
     
-    for(k in 1:length(hold_corr)){
-      
-      # For actual responses
-      if(is.na(hold_resp[k])==F){
+    ## determine behavior - split for stim types
+    # (TH = 61, TL = 62, TO = 63, LH = 71, LL = 72, OL = 73, FH = 91, FL = 92, FO = 93)
+    # (1 = old, 2 = sim, 3 = new)
+    
+    for( k in c(6:7,9)){
+      # r is response
+      for( r in 1:3){
+        indAll <- which(grepl(k,hold_stimType) & hold_resp==r & hold_corr!=3)
         
-        # Repeats only
-        if(hold_corr[k] != 3){
-          
-          # Targets
-          if(grepl("6",hold_stimType[k]) == T){
-            
-            # collapse across all stimulus types
-            if(hold_resp[k] == 1){
-              assign(paste0("behAll_resp_block",i),c(get(paste0("behAll_resp_block",i)),"Hit"))
-            }else if(hold_resp[k] == 2){
-              assign(paste0("behAll_resp_block",i),c(get(paste0("behAll_resp_block",i)),"Miss"))
-            }else{
-              assign(paste0("behAll_resp_block",i),c(get(paste0("behAll_resp_block",i)),"XT_New"))
+        # type is high and low calorie and object
+        for( type in 1:3){
+          indSep <- which(grepl(paste0(k,type),hold_stimType) & hold_resp==r & hold_corr!=3)
+          # Target
+          if(k == 6){
+            if(r==1){
+              behAll_resp[indAll] <- "Hit"
+              if(type==1){ behSep_resp[indSep] <- "H_Hit"}
+              if(type==2){ behSep_resp[indSep] <- "L_Hit"}
+              if(type==3){ behSep_resp[indSep] <- "O_Hit"}
             }
-            
-            # High cal
-            if(hold_stimType[k] == 61){
-              if(hold_resp[k] == 1){
-                assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"H_Hit"))
-              }else if(hold_resp[k] == 2){
-                assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"H_Miss"))
-              }else{
-                assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"XHT_New"))
-              }
-              
-              # Low cal
-            }else if(hold_stimType[k] == 62){
-              if(hold_resp[k] == 1){
-                assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"L_Hit"))
-              }else if(hold_resp[k] == 2){
-                assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"L_Miss"))
-              }else{
-                assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"XLT_New"))
-              }
-              
-              # Object
-            }else if(hold_stimType[k] == 63){
-              if(hold_resp[k] == 1){
-                assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"O_Hit"))
-              }else if(hold_resp[k] == 2){
-                assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"O_Miss"))
-              }else{
-                assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"XOT_New"))
-              }
+            if(r==2){
+              behAll_resp[indAll] <- "Miss"
+              if(type==1){ behSep_resp[indSep] <- "H_Miss"}
+              if(type==2){ behSep_resp[indSep] <- "L_Miss"}
+              if(type==3){ behSep_resp[indSep] <- "O_Miss"}
             }
-            
-            # Lures
-          }else if(grepl("7",hold_stimType[k]) == T){
-            
-            # collapse across all stimulus types
-            if(hold_resp[k] == 1){
-              assign(paste0("behAll_resp_block",i),c(get(paste0("behAll_resp_block",i)),"LFA"))
-            }else if(hold_resp[k] == 2){
-              assign(paste0("behAll_resp_block",i),c(get(paste0("behAll_resp_block",i)),"LCR"))
-            }else{
-              assign(paste0("behAll_resp_block",i),c(get(paste0("behAll_resp_block",i)),"XL_New"))
-            }
-            
-            # High cal
-            if(hold_stimType[k] == 71){
-              if(hold_resp[k] == 1){
-                assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"H_LFA"))
-              }else if(hold_resp[k] == 2){
-                assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"H_LCR"))
-              }else{
-                assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"XHL_New"))
-              }
-              
-              # Low cal
-            }else if(hold_stimType[k] == 72){
-              if(hold_resp[k] == 1){
-                assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"L_LFA"))
-              }else if(hold_resp[k] == 2){
-                assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"L_LCR"))
-              }else{
-                assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"XLL_New"))
-              }
-              
-              # Object
-            }else if(hold_stimType[k] == 73){
-              if(hold_resp[k] == 1){
-                assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"O_LFA"))
-              }else if(hold_resp[k] == 2){
-                assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"O_LCR"))
-              }else{
-                assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"XOL_New"))
-              }
+            if(r==3){
+              behAll_resp[indAll] <- "XT_New"
+              if(type==1){ behSep_resp[indSep] <- "XHT_New"}
+              if(type==2){ behSep_resp[indSep] <- "XLT_New"}
+              if(type==3){ behSep_resp[indSep] <- "XOT_New"}
             }
           }
           
-          # First presentations
-        }else{
-          
-          # collapse across all stimulus types
-          if(hold_resp[k] == 1){
-            assign(paste0("behAll_resp_block",i),c(get(paste0("behAll_resp_block",i)),"XF_FA"))
-          }else if(hold_resp[k] == 2){
-            assign(paste0("behAll_resp_block",i),c(get(paste0("behAll_resp_block",i)),"XF_Miss"))
-          }else{
-            assign(paste0("behAll_resp_block",i),c(get(paste0("behAll_resp_block",i)),"FCR"))
+          # Lure
+          if(k == 7){
+            if(r==1){
+              behAll_resp[indAll] <- "LFA"
+              if(type==1){ behSep_resp[indSep] <- "H_LFA"}
+              if(type==2){ behSep_resp[indSep] <- "L_LFA"}
+              if(type==3){ behSep_resp[indSep] <- "O_LFA"}
+            }
+            if(r==2){
+              behAll_resp[indAll] <- "LCR"
+              if(type==1){ behSep_resp[indSep] <- "H_LCR"}
+              if(type==2){ behSep_resp[indSep] <- "L_LCR"}
+              if(type==3){ behSep_resp[indSep] <- "O_LCR"}
+            }
+            if(r==3){
+              behAll_resp[indAll] <- "XL_New"
+              if(type==1){ behSep_resp[indSep] <- "XHL_New"}
+              if(type==2){ behSep_resp[indSep] <- "XLL_New"}
+              if(type==3){ behSep_resp[indSep] <- "XOL_New"}
+            }
+            
           }
-          
-          # High cal
-          if(hold_stimType[k] == 91){
-            if(hold_resp[k] == 1){
-              assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"XHF_FA"))
-            }else if(hold_resp[k] == 2){
-              assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"XHF_Miss"))
-            }else{
-              assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"H_FCR"))
+         
+          # Foils
+          if(k == 9){
+            indAll <- which(grepl(k,hold_stimType) & hold_resp==r) 
+            indSep <- which(grepl(paste0(k,type),hold_stimType) & hold_resp==r)
+            if(r==1){
+              behAll_resp[indAll] <- "XF_FA"
+              if(type==1){ behSep_resp[indSep] <- "XHF_FA"}
+              if(type==2){ behSep_resp[indSep] <- "XLF_FA"}
+              if(type==3){ behSep_resp[indSep] <- "XOF_FA"}
+            }
+            if(r==2){
+              behAll_resp[indAll] <- "XF_Miss"
+              if(type==1){ behSep_resp[indSep] <- "XHF_Miss"}
+              if(type==2){ behSep_resp[indSep] <- "XLF_Miss"}
+              if(type==3){ behSep_resp[indSep] <- "XOF_Miss"}
+            }
+            if(r==3){
+              behAll_resp[indAll] <- "FCR"
+              if(type==1){ behSep_resp[indSep] <- "H_FCR"}
+              if(type==2){ behSep_resp[indSep] <- "L_FCR"}
+              if(type==3){ behSep_resp[indSep] <- "O_FCR"}
             }
             
-            # Low cal
-          }else if(hold_stimType[k] == 92){
-            if(hold_resp[k] == 1){
-              assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"XLF_FA"))
-            }else if(hold_resp[k] == 2){
-              assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"XLF_Miss"))
-            }else{
-              assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"L_FCR"))
-            }
-            
-            # Object
-          }else if(hold_stimType[k] == 93){
-            if(hold_resp[k] == 1){
-              assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"XOF_FA"))
-            }else if(hold_resp[k] == 2){
-              assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"XOF_Miss"))
-            }else{
-              assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"O_FCR"))
-            }
+          }
+        
+          # First Presentations
+          indAllFirst <- which(hold_resp==r & hold_corr==3)
+          indSepFirst <- which(grepl(type,hold_stimType) & hold_resp==r & hold_corr==3)
+          if(r==1){
+            behAll_resp[indAllFirst] <- "XF_FA"
+            if(type==1){ behSep_resp[indSepFirst] <- "XHF_FA"}
+            if(type==2){ behSep_resp[indSepFirst] <- "XLF_FA"}
+            if(type==3){ behSep_resp[indSepFirst] <- "XOF_FA"}
+          }
+          if(r==2){
+            behAll_resp[indAllFirst] <- "XF_Miss"
+            if(type==1){ behSep_resp[indSepFirst] <- "XHF_Miss"}
+            if(type==2){ behSep_resp[indSepFirst] <- "XLF_Miss"}
+            if(type==3){ behSep_resp[indSepFirst] <- "XOF_Miss"}
+          }
+          if(r==3){
+            behAll_resp[indAllFirst] <- "FCR"
+            if(type==1){ behSep_resp[indSepFirst] <- "H_FCR"}
+            if(type==2){ behSep_resp[indSepFirst] <- "L_FCR"}
+            if(type==3){ behSep_resp[indSepFirst] <- "O_FCR"}
           }
         }
-        
-        # Non-responses
-      }else{
-        assign(paste0("behAll_resp_block",i),c(get(paste0("behAll_resp_block",i)),"999"))
-        assign(paste0("behSep_resp_block",i),c(get(paste0("behSep_resp_block",i)),"999"))
       }
     }
-  }
-}
-
-
-
-
-
-
-
-
-
+    
+    behAll_resp[which(behAll_resp=="0")] <- "999"
+    behSep_resp[which(behSep_resp=="0")] <- "999"
+    assign(paste0("behAll_resp_block",i),behAll_resp)
+    assign(paste0("behSep_resp_block",i),behSep_resp)
+    
+  } # for blocks
+} # for participant
+              
+          
+            

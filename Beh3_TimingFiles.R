@@ -9,6 +9,9 @@ outputDir <- "/Volumes/Vedder/FoodMST/Analyses/behAnalysis/timing_files/"
 txtList <- list.files(path = inputDir, pattern = ".*.txt")
 txtList <- t(txtList)
 
+
+writeTiming <- 1
+
 # j <- txtList[1]
 for(j in txtList){
   
@@ -70,14 +73,13 @@ for(j in txtList){
         
         # Targets/Lures only
         indAll <- which(grepl(k,hold_stimType) & hold_resp==r & hold_corr!=3)
-        
         tmp_timeAll <- hold_stimOnset[indAll]
         hold_timeAll <- round((tmp_timeAll-hold_base)/1000,1)
         
         # type is high and low calorie and object
         for( type in 1:3){
-          indSep <- which(grepl(paste0(k,type),hold_stimType) & hold_resp==r & hold_corr!=3)
           
+          indSep <- which(grepl(paste0(k,type),hold_stimType) & hold_resp==r & hold_corr!=3)
           tmp_timeSep <- hold_stimOnset[indSep]
           hold_timeSep <- round((tmp_timeSep-hold_base)/1000,1)
           
@@ -131,61 +133,105 @@ for(j in txtList){
           if(k == 9){
             
             indAll <- which(grepl(k,hold_stimType) & hold_resp==r) 
+            tmp_timeAll <- hold_stimOnset[indAll]
+            hold_timeAll <- round((tmp_timeAll-hold_base)/1000,1)
+            
             indSep <- which(grepl(paste0(k,type),hold_stimType) & hold_resp==r)
-            
-            
+            tmp_timeSep <- hold_stimOnset[indSep]
+            hold_timeSep <- round((tmp_timeSep-hold_base)/1000,1)
             
             if(r==1){
-              behAll_resp[indAll] <- "XF_FA"
-              if(type==1){ behSep_resp[indSep] <- "XHF_FA"}
-              if(type==2){ behSep_resp[indSep] <- "XLF_FA"}
-              if(type==3){ behSep_resp[indSep] <- "XOF_FA"}
+              behAll_resp[indAll] <- "XF_FA"; time_All_XF_FA <- hold_timeAll
+              if(type==1){ behSep_resp[indSep] <- "XHF_FA"; time_H_XF_FA <- hold_timeSep}
+              if(type==2){ behSep_resp[indSep] <- "XLF_FA"; time_L_XF_FA <- hold_timeSep}
+              if(type==3){ behSep_resp[indSep] <- "XOF_FA"; time_O_XF_FA <- hold_timeSep}
             }
             if(r==2){
-              behAll_resp[indAll] <- "XF_Miss"
-              if(type==1){ behSep_resp[indSep] <- "XHF_Miss"}
-              if(type==2){ behSep_resp[indSep] <- "XLF_Miss"}
-              if(type==3){ behSep_resp[indSep] <- "XOF_Miss"}
+              behAll_resp[indAll] <- "XF_Miss"; time_All_XF_Miss <- hold_timeAll
+              if(type==1){ behSep_resp[indSep] <- "XHF_Miss"; time_H_XF_Miss <- hold_timeSep}
+              if(type==2){ behSep_resp[indSep] <- "XLF_Miss"; time_L_XF_Miss <- hold_timeSep}
+              if(type==3){ behSep_resp[indSep] <- "XOF_Miss"; time_O_XF_Miss <- hold_timeSep}
             }
             if(r==3){
-              behAll_resp[indAll] <- "FCR"
-              if(type==1){ behSep_resp[indSep] <- "H_FCR"}
-              if(type==2){ behSep_resp[indSep] <- "L_FCR"}
-              if(type==3){ behSep_resp[indSep] <- "O_FCR"}
+              behAll_resp[indAll] <- "FCR"; time_All_FCR <- hold_timeAll
+              if(type==1){ behSep_resp[indSep] <- "H_FCR"; time_H_FCR <- hold_timeSep}
+              if(type==2){ behSep_resp[indSep] <- "L_FCR"; time_L_FCR <- hold_timeSep}
+              if(type==3){ behSep_resp[indSep] <- "O_FCR"; time_O_FCR <- hold_timeSep}
             }
           }
         
           # First Presentations
           indAllFirst <- which(hold_resp==r & hold_corr==3)
+          tmp_timeAllFirst <- hold_stimOnset[indAllFirst]
+          hold_timeAllFirst <- round((tmp_timeAllFirst-hold_base)/1000,1)
+          
           indSepFirst <- which(grepl(type,hold_stimType) & hold_resp==r & hold_corr==3)
+          tmp_timeSepFirst <- hold_stimOnset[indSepFirst]
+          hold_timeSepFirst <- round((tmp_timeSepFirst-hold_base)/1000,1)
+          
           if(r==1){
-            behAll_resp[indAllFirst] <- "XF_FA"
-            if(type==1){ behSep_resp[indSepFirst] <- "XHF_FA"}
-            if(type==2){ behSep_resp[indSepFirst] <- "XLF_FA"}
-            if(type==3){ behSep_resp[indSepFirst] <- "XOF_FA"}
+            behAll_resp[indAllFirst] <- "XF_FA"; time_All_XF_FA <- hold_timeAllFirst
+            if(type==1){ behSep_resp[indSepFirst] <- "XHF_FA"; time_H_XF_FA <- hold_timeSepFirst}
+            if(type==2){ behSep_resp[indSepFirst] <- "XLF_FA"; time_L_XF_FA <- hold_timeSepFirst}
+            if(type==3){ behSep_resp[indSepFirst] <- "XOF_FA"; time_O_XF_FA <- hold_timeSepFirst}
           }
           if(r==2){
-            behAll_resp[indAllFirst] <- "XF_Miss"
-            if(type==1){ behSep_resp[indSepFirst] <- "XHF_Miss"}
-            if(type==2){ behSep_resp[indSepFirst] <- "XLF_Miss"}
-            if(type==3){ behSep_resp[indSepFirst] <- "XOF_Miss"}
+            behAll_resp[indAllFirst] <- "XF_Miss"; time_All_XF_Miss <- hold_timeAllFirst
+            if(type==1){ behSep_resp[indSepFirst] <- "XHF_Miss"; time_H_XF_Miss <- hold_timeSepFirst}
+            if(type==2){ behSep_resp[indSepFirst] <- "XLF_Miss"; time_L_XF_Miss <- hold_timeSepFirst}
+            if(type==3){ behSep_resp[indSepFirst] <- "XOF_Miss"; time_O_XF_Miss <- hold_timeSepFirst}
           }
           if(r==3){
-            behAll_resp[indAllFirst] <- "FCR"
-            if(type==1){ behSep_resp[indSepFirst] <- "H_FCR"}
-            if(type==2){ behSep_resp[indSepFirst] <- "L_FCR"}
-            if(type==3){ behSep_resp[indSepFirst] <- "O_FCR"}
+            behAll_resp[indAllFirst] <- "FCR"; time_All_FCR <- hold_timeAllFirst
+            if(type==1){ behSep_resp[indSepFirst] <- "H_FCR"; time_H_FCR <- hold_timeSepFirst}
+            if(type==2){ behSep_resp[indSepFirst] <- "L_FCR"; time_L_FCR <- hold_timeSepFirst}
+            if(type==3){ behSep_resp[indSepFirst] <- "O_FCR"; time_O_FCR <- hold_timeSepFirst}
           }
-        }
-      }
-    }
+        } # type loop
+      } # r loop
+    } # k loop
     
+    
+    # Block behaviors
     behAll_resp[which(behAll_resp=="0")] <- "999"
     behSep_resp[which(behSep_resp=="0")] <- "999"
     assign(paste0("behAll_resp_block",i),behAll_resp)
     assign(paste0("behSep_resp_block",i),behSep_resp)
     
+    
+    # Block Timings
+    for(stim in c("All","O","H","L")){
+      for(beh in c("Hit","Miss","XT_New","LFA","LCR","XL_New","XF_FA","XF_Miss","FCR","NR")){
+        hold_loop <- get(paste0("time_",stim,"_",beh))
+        if(is.na(hold_loop)==F && length(hold_loop)!=0){
+          assign(paste0("time_",stim,"_",beh,i),hold_loop)
+        }else{
+          assign(paste0("time_",stim,"_",beh,i),999)
+        }
+      }
+    }
+    
   } # for blocks
+  
+  
+  ## write timing, one row per block
+  if(writeTiming == 1){
+    
+    tmp <- gsub("^.*?-", "", j);  subNum <- gsub("-.*?$","",tmp)
+    
+    for(stim in c("All","O","H","L")){
+      for(beh in c("Hit","Miss","XT_New","LFA","LCR","XL_New","XF_FA","XF_Miss","FCR","NR")){
+        for(block in 1:length(ind_blockList)){
+          assign(paste0("hold",block),get(paste0("time_",stim,"_",beh,block)))
+        }
+        
+        outFile <- paste0(outputDir,"sub-",subNum,"_",stim,"_",beh,".txt")
+        cat(hold1, "\n", file=outFile, append=F, sep='\t')
+        cat(hold2, "\n", file=outFile, append=T, sep='\t')
+        cat(hold3, "\n", file=outFile, append=T, sep='\t')
+      }
+    }
+  }
 } # for participant
               
           

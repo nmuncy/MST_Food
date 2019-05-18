@@ -12,8 +12,8 @@ mkdir -p $outDir $timDir
 
 cd $refDir
 
-for i in p*; do
-	if [ -f ${i}/FoodMST*.txt ]; then
-		cp ${i}/FoodMST*.txt $outDir
+for i in s*; do
+	if [ -f ${i}/${i}_FoodMST-${i/s}-1.txt ]; then
+		cp ${i}/${i}_FoodMST-${i/s}-1.txt $outDir
 	fi
 done

@@ -90,7 +90,7 @@ if [ ! -f timing_files/${txtBehAll[0]} ]; then
 	mkdir timing_files
 	cp ${parDir}/Analyses/behAnalysis/timing_files/${subj/-s/-}* timing_files/
 	for i in timing_files/sub*; do
-		string=${i#*_}
+		string=${i#*sub-???_}
 		mv $i timing_files/${subj}_$string
 	done
 fi

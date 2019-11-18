@@ -23,7 +23,7 @@ library("openxlsx")
 ### Set variables
 parDir <- paste0(getwd(),"/..")
 workDir <- paste0(parDir,"/Participants/")
-stimDir <- paste0(parDir,"/Stimuli/")
+stimDir <- paste0(parDir,"/stimuli/")
 # winPath <- "Stimuli\\"
 
 

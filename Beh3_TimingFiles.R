@@ -10,6 +10,7 @@ txtList <- list.files(path = inputDir, pattern = ".*.txt")
 txtList <- t(txtList)
 
 # blah blah
+# foo
 
 writeTiming <- 1
 

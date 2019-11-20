@@ -9,6 +9,7 @@ outputDir <- "/Volumes/Vedder/FoodMST/Analyses/behAnalysis/timing_files/"
 txtList <- list.files(path = inputDir, pattern = ".*.txt")
 txtList <- t(txtList)
 
+# blah blah
 
 writeTiming <- 1
 

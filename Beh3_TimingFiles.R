@@ -1,7 +1,6 @@
-### load data and packages
+##### ----- load data and packages ----- #####
 library(stringr)
 library(openxlsx)
-
 
 inputDir <- "/Volumes/Vedder/FoodMST/Analyses/behAnalysis/all_data/converted/"
 outputDir <- "/Volumes/Vedder/FoodMST/Analyses/behAnalysis/timing_files/"
@@ -9,32 +8,28 @@ outputDir <- "/Volumes/Vedder/FoodMST/Analyses/behAnalysis/timing_files/"
 txtList <- list.files(path = inputDir, pattern = ".*.txt")
 txtList <- t(txtList)
 
-# blah blah
-# foo
-
 writeTiming <- 1
 
+##### ----- populating output matrices ----- #####
 # j <- txtList[1]
 for(j in txtList){
   
-  # data_raw <- read.delim(paste0("~/Desktop/",j),sep=" ")
-  data_raw <- read.delim(paste0(inputDir,j),sep=" ")
+  data_raw <- data.frame(read.delim2(paste0(inputDir,j),sep=c("\t"),comment.char = "<",fileEncoding ="UCS-2LE" ))
   
   # strip off training
-  ind_start <- as.numeric(grep("Test:", data_raw[,1]))
+  ind_start <- as.numeric(grep("Test: ", data_raw[,1]))
   data_raw <- data_raw[-(1:ind_start),]
-  row.names(data_raw) <- 1:dim(data_raw)[1]
   
   # blocks
-  ind_blockList <- grep("BlockList:",data_raw[,1])
+  ind_blockList <- grep("BlockList:",data_raw)
   num_blocks <- as.numeric(length(ind_blockList))
   
   # pull data positions
-  ind_stimImage <- grep("StimImage:", data_raw[,1])
-  ind_stimType <- grep("StimValue:", data_raw[,1])
-  ind_stimOnset <- grep("Stim.OnsetTime:", data_raw[,1])
-  ind_corr <- grep("Correct:", data_raw[,1])
-  ind_resp <- grep("Stim.RESP:", data_raw[,1])
+  ind_stimImage <- grep("StimImage:", data_raw)
+  ind_stimType <- grep("StimValue:", data_raw)
+  ind_stimOnset <- grep("Stim.OnsetTime:", data_raw)
+  ind_corr <- grep("Correct:", data_raw)
+  ind_resp <- grep("Stim.RESP:", data_raw)
 
   
   # split into blocks
@@ -47,10 +42,11 @@ for(j in txtList){
     }
     
     # get info
-    hold_stimType <- as.numeric(as.character(data_raw[ind_stimType[ind_block],2]))
-    hold_stimOnset <- as.numeric(as.character(data_raw[ind_stimOnset[ind_block],2])); hold_base <- hold_stimOnset[1]
-    hold_resp <- as.numeric(as.character(data_raw[ind_resp[ind_block],2]))
-    hold_corr <- as.numeric(as.character(data_raw[ind_corr[ind_block],2]))
+    hold_stimType <- as.numeric(sub("StimValue: ", "",data_raw[ind_stimType[ind_block]]))
+    hold_stimOnset <- as.numeric(sub("Stim.OnsetTime: ", "",data_raw[ind_stimOnset[ind_block]]))
+    hold_base <- hold_stimOnset[1]
+    hold_resp <- as.numeric(sub("Stim.RESP: ", "", data_raw[ind_resp[ind_block]]))
+    hold_corr <- as.numeric(sub("Correct: ", "",data_raw[ind_corr[ind_block]]))
     
     # set up matrices
     behAll_resp <- behSep_resp <- matrix(0,nrow=length(ind_block),ncol=1)
@@ -64,7 +60,7 @@ for(j in txtList){
 
     
     ## determine behavior - split for stim types
-    # (TH = 61, TL = 62, TO = 63, LH = 71, LL = 72, OL = 73, FH = 91, FL = 92, FO = 93)
+    # (TH = 61, TL = 62, TO = 63, LH = 71, LL = 72, LO = 73, FH = 91, FL = 92, FO = 93)
     # (1 = old, 2 = sim, 3 = new)
     
     # k is T/L/F

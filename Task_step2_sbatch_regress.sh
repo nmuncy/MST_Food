@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --time=30:00:00   # walltime
+#SBATCH --time=10:00:00   # walltime
 #SBATCH --ntasks=6   # number of processor cores (i.e. tasks)
 #SBATCH --nodes=1   # number of nodes
 #SBATCH --mem-per-cpu=8gb   # memory per CPU core
@@ -41,7 +41,6 @@ export OMP_NUM_THREADS=$SLURM_CPUS_ON_NODE
 
 
 subj=$1
-testMode=$2
 
 
 ### --- Experimenter input --- ###
@@ -50,28 +49,38 @@ testMode=$2
 
 parDir=~/compute/FoodMST					  			# parent dir, where derivatives is located
 workDir=${parDir}/derivatives/$subj
+timeMaster=${parDir}/Analyses/behAnalysis/timing_files
 
 txtFile=1														# whether timing files are in txt format (1) or 1D (0)
-txtTime=0														# if txt file has block duration (1:3) for pmBLOCK (1=on)
+txtTime=1														# if txt file has block duration (1:3) for pmBLOCK (1=on)
 runDecons=1														# toggle for running reml scripts and post hoc (1=on) or just writing scripts (0)
 
-deconNum=(2)													# See Note 4 above
-deconPref=(BehAll BehSep)										# array of prefix for each planned decon (length must equal sum of $deconNum)
+deconNum=(6)													# See Note 4 above
+deconPref=(Decon{Combined,FoodObject,HiLow,EncPrec{Combined,FoodObject,HiLow}})										# array of prefix for each planned decon (length must equal sum of $deconNum)
 
 
 ## For 1D timing files
-deconLen=(1.5)													# trial duration for each Phase (argument for BLOCK in deconvolution). Use when $txtFile=0 or $txtTime=0
-#deconTiming=(Test1_TF_4_behVect)								# array of timing files for each planned deconvolution (length must == $deconPref)
+# deconLen=(1.5)													# trial duration for each Phase (argument for BLOCK in deconvolution). Use when $txtFile=0 or $txtTime=0
+# deconTiming=(Test1_TF_4_behVect)								# array of timing files for each planned deconvolution (length must == $deconPref)
 
 
 # For txt timing files
-txtBehAll=(${subj}_All_{Hit,LCR,LFA,Miss}.txt)
-txtBehSep=(${subj}_{O,H,L}_{Hit,LCR,LFA,Miss}.txt)
+txtDeconCombined=(${subj}_All_{FCR,Hit,LCR,LFA,Miss}.txt)
+txtDeconFoodObject=(${subj}_{Food,O}_{FCR,Hit,LCR,LFA,Miss}.txt)
+txtDeconObjHiLow=(${subj}_{H,L,O}_{FCR,Hit,LCR,LFA,Miss}.txt)
+
+txtDeconEncPrecCombined=(${subj}_All_Prec_{FCR,Hit,LCR,LFA,Miss}.txt)
+txtDeconEncPrecFoodObject=(${subj}_{Food,O}_Prec_{FCR,Hit,LCR,LFA,Miss}.txt)
+txtDeconEncPrecObjHiLow=(${subj}_{H,L,O}_Prec_{FCR,Hit,LCR,LFA,Miss}.txt)
 
 # Label beh sub-bricks, per decon
-namBehAll=(Hit LCR LFA Miss)									# "Foo" of namFoo matches a $deconPref value, one string per timing file (e.g. deconPref=(SpT1); namSpT1=(Hit CR Miss FA))
-namBehSep=({O,H,L}_{Hit,LCR,LFA,Miss})
+namDeconCombined=(FCR Hit LCR LFA Miss)									# "Foo" of namFoo matches a $deconPref value, one string per timing file (e.g. deconPref=(SpT1); namSpT1=(Hit CR Miss FA))
+namDeconFoodObject=({Food,O}_{FCR,Hit,LCR,LFA,Miss})
+namDeconObjHiLow=({H,L,O}_{FCR,Hit,LCR,LFA,Miss})
 
+namDeconEncPrecCombined=(EP_{FCR,Hit,LCR,LFA,Miss})
+namDeconEncPrecFoodObject=(EP_{Food,O}_{FCR,Hit,LCR,LFA,Miss})
+namDeconEncPrecObjHiLow=(EP_{H,L,O}_{FCR,Hit,LCR,LFA,Miss})
 
 
 
@@ -86,9 +95,9 @@ namBehSep=({O,H,L}_{Hit,LCR,LFA,Miss})
 # get timing files
 cd $workDir
 
-if [ ! -f timing_files/${txtBehAll[0]} ]; then
+if [ ! -f timing_files/${txtDeconCombined[0]} ]; then
 	mkdir timing_files
-	cp ${parDir}/Analyses/behAnalysis/timing_files/${subj/-s/-}* timing_files/
+	cp ${timeMaster}/${subj/-s/-}* timing_files/
 	for i in timing_files/sub*; do
 		string=${i#*sub-???_}
 		mv $i timing_files/${subj}_$string
@@ -530,19 +539,4 @@ if [ $runDecons == 1 ]; then
 			rm *ss_review*
 		done
 	done
-fi
-
-
-
-# clean
-if [ $testMode == 1 ]; then
-	rm tmp_*
-	rm -r a*
-	rm final_mask_{CSF,GM}*
-	rm *corr_brain*
-	rm *gmean_errts*
-	rm *volreg*
-	rm Temp*
-	rm *WMe_rall*
-	rm full_mask.*
 fi

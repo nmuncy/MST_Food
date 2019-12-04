@@ -14,13 +14,13 @@ mkdir -p $outDir
 
 cd ${workDir}/derivatives
 for i in sub*; do
+	if [ ! -f ${i}/DeconCombined_stats_REML+tlrc.HEAD ]; then
 
-	[ $i == sub-s300 ]; test=$?
+	    sbatch \
+	    -o ${outDir}/output_TS2_${i}.txt \
+	    -e ${outDir}/error_TS2_${i}.txt \
+	    ${scriptDir}/Task_step2_sbatch_regress.sh $i
 
-    sbatch \
-    -o ${outDir}/output_TS2_${i}.txt \
-    -e ${outDir}/error_TS2_${i}.txt \
-    ${scriptDir}/Task_step2_sbatch_regress.sh $i $test
-
-    sleep 1
+	    sleep 1
+	fi
 done

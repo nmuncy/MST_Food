@@ -22,6 +22,7 @@
 rawDir=/Volumes/Vedder/MriRawData							# location of raw data
 workDir=/Volumes/Vedder/FoodMST								# desired working directory
 tempDir=/Volumes/Yorick/Templates
+docDir=${workDir}/docs
 
 session=FoodMST												# scanning session - for raw data organization (ses-STT)
 task=task-MST												# name of task, for epi data naming
@@ -31,6 +32,7 @@ t1Dir=t1													# t1 ditto
 t2Dir=HHR													# t2 ditto
 blipDir=(Reverse)											# blip ditto - names one per scanning phase
 
+subjList=(`cat ${docDir}/subj_list.txt`)
 
 
 
@@ -86,7 +88,7 @@ fi
 
 ### Work
 cd $rawDir
-for i in sub-s3*; do
+for i in ${subjList[@]}; do
 
 	### set up BIDS data dirs
 	anatDir=${workDir}/rawdata/${i}/anat

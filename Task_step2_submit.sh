@@ -14,7 +14,7 @@ mkdir -p $outDir
 
 cd ${workDir}/derivatives
 for i in sub*; do
-	if [ ! -f ${i}/DeconEncPrecObjHiLow_stats_REML+tlrc.HEAD ]; then
+	if [ ! -f ${i}/Encoding_stats_REML+tlrc.HEAD ]; then
 
 	    sbatch \
 	    -o ${outDir}/output_TS2_${i}.txt \

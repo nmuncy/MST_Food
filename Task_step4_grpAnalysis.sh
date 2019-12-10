@@ -149,8 +149,11 @@ blurInt=`printf "%.0f" $blurH`
 for i in ${compList[@]}; do
 
 	# get estimates from e/subj
-	print=ACF_raw_${i}.txt
-	if [ ! -s $print ]; then
+	if [ ! -s ACF_MC_${i}.txt ]; then
+
+		print=ACF_raw_${i}.txt
+		> $print
+
 		for k in ${subjList[@]}; do
 			for m in stats errts; do
 
@@ -162,21 +165,18 @@ for i in ${compList[@]}; do
 			done
 
 			# parameter estimate
-			file=${workDir}/${k}/${i}_errts_REML_blur${blurInt}+tlrc
+			file=${k}/${i}_errts_REML_blur${blurInt}+tlrc
 			3dFWHMx -mask $mask -input $file -acf >> $print
 		done
-	fi
 
-
-	# simulate noise, determine thresholds
-	if [ ! -s ACF_MC_${i}.txt ]; then
-
+		# cacluate averages
 		sed '/ 0  0  0    0/d' $print > tmp
 
 		xA=`awk '{ total += $1 } END { print total/NR }' tmp`
 		xB=`awk '{ total += $2 } END { print total/NR }' tmp`
 		xC=`awk '{ total += $3 } END { print total/NR }' tmp`
 
+		# simulate noise, determine thresholds
 		3dClustSim -mask $mask -LOTS -iter 10000 -acf $xA $xB $xC > ACF_MC_${i}.txt
 		rm tmp
 	fi

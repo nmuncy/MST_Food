@@ -201,7 +201,7 @@ for i in ${compList[@]}; do
 			beh=${hold#*_}
 
 			scan=${i}_stats_REML_blur${blurInt}+tlrc
-			dataFrame+="$m $type $beh ${m}/'${scan}[${brickArr[$c]}]' "
+			dataFrame+="${m##*\/} $type $beh ${m}/'${scan}[${brickArr[$c]}]' "
 			let c+=1
 		done
 	done
